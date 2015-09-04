@@ -1,0 +1,10 @@
+## Interface: 60000
+## Author: Caellian
+## Title: |cffD7BEA5cael|rNameplates
+## Notes: Custom minimalistic nameplates
+## SavedVariables: caelNameplatesDB
+## X-Revision: $Id: caelNameplates.toc 3119 2013-04-19 10:50:14Z sdkyron@gmail.com $
+## X-Website: http://www.wowinterface.com/list.php?skinnerid=31773
+## X-Category: Miscellaneous
+
+caelNamePlates.lua
