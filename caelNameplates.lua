@@ -134,10 +134,12 @@ local UpdatePlate = function(self)
 	self.castBar.IconOverlay:SetVertexColor(self.r, self.g, self.b)
 
 	self.castBar:ClearAllPoints()
-	self.castBar:SetPoint("TOP", self.healthBar, "BOTTOM", 0, -4)
-	self.castBar:SetPoint("BOTTOM", self.healthBar, "BOTTOM", 0, -8)
-	self.castBar:SetHeight(5)
-	self.castBar:SetWidth(110)
+	self.castBar:SetPoint("TOPLEFT", self.healthBar, "BOTTOMLEFT", 0, -4)
+	self.castBar:SetPoint("TOPRIGHT", self.healthBar, "BOTTOMRIGHT", -20, -4)
+	self.castBar:SetPoint("BOTTOMLEFT", self.healthBar, "BOTTOMLEFT", 0, -9)
+	self.castBar:SetPoint("BOTTOMRIGHT", self.healthBar, "BOTTOMRIGHT", -20, -9)
+	--self.castBar:SetHeight(5)
+	--self.castBar:SetWidth(80)
 
 	self.highlight:ClearAllPoints()
 	self.highlight:SetAllPoints(self.healthBar)
@@ -166,10 +168,12 @@ local FixCastbar = function(self)
 
 
 	self:ClearAllPoints()
-	self:SetPoint("TOP", self.healthBar, "BOTTOM", 0, -4)
-	self:SetPoint("BOTTOM", self.healthBar, "BOTTOM", 0, -9)
-	self:SetHeight(5)
-	self:SetWidth(110)
+	self:SetPoint("TOPLEFT", self.healthBar, "BOTTOMLEFT", 0, -4)
+	self:SetPoint("TOPRIGHT", self.healthBar, "BOTTOMRIGHT", -20, -4)
+	self:SetPoint("BOTTOMLEFT", self.healthBar, "BOTTOMLEFT", 0, -9)
+	self:SetPoint("BOTTOMRIGHT", self.healthBar, "BOTTOMRIGHT", -20, -9)
+	--self:SetHeight(5)
+	--self:SetWidth(80)
 end
 
 local ColorCastBar = function(self, shielded)
@@ -233,14 +237,14 @@ local CreatePlate = function(frame)
 	frame.isFriendly = nil
 
 	frame.barFrame, frame.nameFrame = frame:GetChildren()
-	frame.healthBar, _, frame.castBar = frame.barFrame:GetChildren()
+	frame.healthBar, frame.absorbBar, frame.castBar = frame.barFrame:GetChildren()
 
 	local healthBar, castBar = frame.healthBar, frame.castBar
 	local glowRegion, overlayRegion, highlightRegion, levelTextRegion, bossIconRegion, raidIconRegion, stateIconRegion = frame.barFrame:GetRegions()
 	--local _, castbarOverlay, shieldedRegion, spellIconRegion = castBar:GetRegions()
 	local castbarOverlay = frame.ArtContainer.CastBarBorder
-	local shieldedRegion = frame.ArtContainer.CastBarSpellIcon
-	local spellIconRegion = frame.ArtContainer.CastBarFrameShield
+	local shieldedRegion = frame.ArtContainer.CastBarFrameShield
+	local spellIconRegion = frame.ArtContainer.CastBarSpellIcon
 	local nameTextRegion = frame.nameFrame:GetRegions()
 
 	frame.oldname = nameTextRegion
@@ -254,7 +258,7 @@ local CreatePlate = function(frame)
 	frame.name = newNameRegion
 	
 	local healthvalueRegion = frame:CreateFontString(nil, "ARTWORK")
-	healthvalueRegion:SetPoint("RIGHT", healthBar, "BOTTOMRIGHT", 0, -3)
+	healthvalueRegion:SetPoint("RIGHT", healthBar, "BOTTOMRIGHT", 12, -4)
 	healthvalueRegion:SetFont(font, fontSize, fontOutline)
 	healthvalueRegion:SetTextColor(0.84, 0.75, 0.65)
 	healthvalueRegion:SetShadowOffset(1.25, -1.25)
@@ -300,7 +304,7 @@ local CreatePlate = function(frame)
 	castBar:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
 
 	castBar.time = castBar:CreateFontString(nil, "ARTWORK")
-	castBar.time:SetPoint("RIGHT", castBar, "LEFT", -1, 0)
+	castBar.time:SetPoint("RIGHT", castBar, "LEFT", 3, 0)
 	castBar.time:SetFont(font, fontSize, fontOutline)
 	castBar.time:SetTextColor(0.84, 0.75, 0.65)
 	castBar.time:SetShadowOffset(1.25, -1.25)
@@ -313,7 +317,7 @@ local CreatePlate = function(frame)
 	castBar.cbGlow = CreateFrame("Frame", nil, castBar)
 	castBar.cbGlow:SetFrameLevel(castBar:GetFrameLevel() -1 > 0 and castBar:GetFrameLevel() -1 or 0)
 	castBar.cbGlow:SetPoint("TOPLEFT", castBar, "TOPLEFT", -2, 2)
-	castBar.cbGlow:SetPoint("BOTTOMRIGHT", castBar, "BOTTOMRIGHT", -2, 2)
+	castBar.cbGlow:SetPoint("BOTTOMRIGHT", castBar, "BOTTOMRIGHT", 2, -2)
 	castBar.cbGlow:SetBackdrop(backdrop)
 	castBar.cbGlow:SetBackdropColor(0, 0, 0, 0)
 	castBar.cbGlow:SetBackdropBorderColor(0, 0, 0)
