@@ -94,6 +94,12 @@ local ThreatUpdate = function(self, elapsed)
 
 	if hasTarget and self:GetAlpha() == 1 then
 		self.myTarget:Show()
+		local unitclass = UnitClassification("target")
+		if unitclass == "rare" then
+			self.boss:SetVertexColor(0.7, 0.65, 0.8)
+		elseif unitclass == "rareelite" then
+			self.boss:SetVertexColor(0.9, 0.35, 0.8)
+		end
 	else
 		self.myTarget:Hide()
 	end
@@ -167,16 +173,10 @@ local UpdatePlate = function(self)
 		--self.level:SetText(level..(elite and "+" or ""))
 		self.level:SetText(level)
 	end
-	local unitclass = UnitClassification("target")
 	
 	self.boss:Hide()
-	if elite then		
+	if elite then	
 		self.boss:Show()
-		if unitclass == "rare" then
-			self.boss:SetVertexColor(0.7, 0.65, 0.8)
-		elseif unitclass == "rareelite" then
-			self.boss:SetVertexColor(0.9, 0.35, 0.8)
-		end
 	end
 end
 
@@ -251,9 +251,9 @@ local CreatePlate = function(frame)
 	local healthBar, castBar = frame.healthBar, frame.castBar
 	local glowRegion, overlayRegion, highlightRegion, levelTextRegion, bossIconRegion, raidIconRegion, stateIconRegion = frame.barFrame:GetRegions()
 	--local _, castbarOverlay, shieldedRegion, spellIconRegion = castBar:GetRegions()
-	local castbarOverlay = frame.ArtContainer.CastBarBorder
-	local shieldedRegion = frame.ArtContainer.CastBarFrameShield
-	local spellIconRegion = frame.ArtContainer.CastBarSpellIcon
+	local castbarOverlay = frame.barFrame.CastBarBorder
+	local shieldedRegion = frame.barFrame.CastBarFrameShield
+	local spellIconRegion = frame.barFrame.CastBarSpellIcon
 	local nameTextRegion = frame.nameFrame:GetRegions()
 
 	frame.oldname = nameTextRegion
@@ -274,11 +274,11 @@ local CreatePlate = function(frame)
 	healthvalueRegion:SetTextColor(1, 1, 1)
 	frame.hpvalue = healthvalueRegion
 	
-	frame.myTarget = frame:CreateTexture(nil, "ARTWORK")
-	frame.myTarget:SetPoint("LEFT", newNameRegion, -110, 0)
-	frame.myTarget:SetVertexColor(1, 0, 0)
-	frame.myTarget:SetSize(320, 40)
-	frame.myTarget:SetTexture(tgtTexture)
+	frame.myTarget = frame.barFrame:CreateTexture(nil, "OVERLAY")
+	frame.myTarget:SetPoint("RIGHT", healthBar, 15, 0)
+	frame.myTarget:SetVertexColor(0.2, 0.9, 0)
+	frame.myTarget:SetSize(14, 14)
+	frame.myTarget:SetTexture(tgtIcon)
 	frame.myTarget:Hide()
 
 	frame.level = levelTextRegion
