@@ -2,10 +2,11 @@
 
 local addonName, ns = ...
 
-local autotoggle = true
+local autotoggle, hasTarget = true, false
 
 local caelNamePlates = CreateFrame("Frame", nil, UIParent)
 caelNamePlates:RegisterEvent("PLAYER_ENTERING_WORLD")
+caelNamePlates:RegisterEvent("PLAYER_TARGET_CHANGED")
 caelNamePlates:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
 function caelNamePlates:PLAYER_REGEN_ENABLED()
 	SetCVar("nameplateShowEnemies", 1)
@@ -31,17 +32,16 @@ function caelNamePlates:PLAYER_ENTERING_WORLD()
 	end
 end
 
+function caelNamePlates:PLAYER_TARGET_CHANGED()
+	hasTarget = UnitExists("target") == true
+end
 
-
-
-
-
-
-
-
-local barTexture = [=[Interface\AddOns\caelNameplates\media\normtexca]=]
+local tgtTexture = [=[Interface\AddOns\caelNameplates\media\Neon_AggroOverlayWhite]=]
+local barTexture = [=[Interface\AddOns\caelNameplates\media\normtexc]=]
 local iconTexture = [=[Interface\AddOns\caelNameplates\media\buttonnormal]=]
 local raidIcons = [=[Interface\AddOns\caelNameplates\media\raidicons]=]
+local eliteTexture = [=[Interface\AddOns\caelNameplates\media\eliteStar]=]
+local tgtIcon = [=[Interface\AddOns\caelNameplates\media\Neon_EliteIcon]=]
 
 
 local font = STANDARD_TEXT_FONT
@@ -91,6 +91,12 @@ local ThreatUpdate = function(self, elapsed)
 
 		self.elapsed = 0
 	end
+
+	if hasTarget and self:GetAlpha() == 1 then
+		self.myTarget:Show()
+	else
+		self.myTarget:Hide()
+	end
 end
 
 
@@ -130,6 +136,7 @@ local UpdatePlate = function(self)
 	self.healthBar:SetHeight(8)
 	self.healthBar:SetWidth(110)
 
+
 	self.healthBar.hpBackground:SetVertexColor(self.r * 0.33, self.g * 0.33, self.b * 0.33, 0.75)
 	self.castBar.IconOverlay:SetVertexColor(self.r, self.g, self.b)
 
@@ -138,8 +145,6 @@ local UpdatePlate = function(self)
 	self.castBar:SetPoint("TOPRIGHT", self.healthBar, "BOTTOMRIGHT", -20, -4)
 	self.castBar:SetPoint("BOTTOMLEFT", self.healthBar, "BOTTOMLEFT", 0, -9)
 	self.castBar:SetPoint("BOTTOMRIGHT", self.healthBar, "BOTTOMRIGHT", -20, -9)
-	--self.castBar:SetHeight(5)
-	--self.castBar:SetWidth(80)
 
 	self.highlight:ClearAllPoints()
 	self.highlight:SetAllPoints(self.healthBar)
@@ -159,14 +164,24 @@ local UpdatePlate = function(self)
 	--elseif not elite and level == mylevel then
 	--	self.level:Hide()
 	else
-		self.level:SetText(level..(elite and "+" or ""))
+		--self.level:SetText(level..(elite and "+" or ""))
+		self.level:SetText(level)
+	end
+	local unitclass = UnitClassification("target")
+	
+	self.boss:Hide()
+	if elite then		
+		self.boss:Show()
+		if unitclass == "rare" then
+			self.boss:SetVertexColor(0.7, 0.65, 0.8)
+		elseif unitclass == "rareelite" then
+			self.boss:SetVertexColor(0.9, 0.35, 0.8)
+		end
 	end
 end
 
 local FixCastbar = function(self)
 	self.castbarOverlay:Hide()
-
-
 	self:ClearAllPoints()
 	self:SetPoint("TOPLEFT", self.healthBar, "BOTTOMLEFT", 0, -4)
 	self:SetPoint("TOPRIGHT", self.healthBar, "BOTTOMRIGHT", -20, -4)
@@ -196,9 +211,6 @@ local OnShow = function(self)
 
 	if self.needFix then
 		FixCastbar(self)
-
-
-
 	end
 
 	ColorCastBar(self, self.shieldedRegion:IsShown())
@@ -210,9 +222,6 @@ local OnValueChanged = function(self, curValue)
 
 	if self.needFix then
 		FixCastbar(self)
-
-
-
 		self.needFix = nil
 	end
 end
@@ -258,13 +267,19 @@ local CreatePlate = function(frame)
 	frame.name = newNameRegion
 	
 	local healthvalueRegion = frame:CreateFontString(nil, "ARTWORK")
-	healthvalueRegion:SetPoint("RIGHT", healthBar, "BOTTOMRIGHT", 12, -4)
+	healthvalueRegion:SetPoint("RIGHT", healthBar, "BOTTOMRIGHT", 12, -6)
 	healthvalueRegion:SetFont(font, fontSize, fontOutline)
 	healthvalueRegion:SetTextColor(0.84, 0.75, 0.65)
 	healthvalueRegion:SetShadowOffset(1.25, -1.25)
 	healthvalueRegion:SetTextColor(1, 1, 1)
 	frame.hpvalue = healthvalueRegion
 	
+	frame.myTarget = frame:CreateTexture(nil, "ARTWORK")
+	frame.myTarget:SetPoint("LEFT", newNameRegion, -110, 0)
+	frame.myTarget:SetVertexColor(1, 0, 0)
+	frame.myTarget:SetSize(320, 40)
+	frame.myTarget:SetTexture(tgtTexture)
+	frame.myTarget:Hide()
 
 	frame.level = levelTextRegion
 	levelTextRegion:SetFont(font, fontSize, fontOutline)
@@ -283,12 +298,6 @@ local CreatePlate = function(frame)
 	healthBar.hpGlow:SetBackdrop(backdrop)
 	healthBar.hpGlow:SetBackdropColor(0, 0, 0, 0)
 	healthBar.hpGlow:SetBackdropBorderColor(0, 0, 0)
-
-
-
-
-
-
 
 
 	castBar.castbarOverlay = castbarOverlay
@@ -347,7 +356,12 @@ local CreatePlate = function(frame)
 	raidIconRegion:ClearAllPoints()
 	raidIconRegion:SetPoint("LEFT", newNameRegion, -17, 0)
 	raidIconRegion:SetSize(18, 18)
-	raidIconRegion:SetTexture(raidIcons)	
+	raidIconRegion:SetTexture(raidIcons)
+
+	bossIconRegion:ClearAllPoints()
+	bossIconRegion:SetPoint("LEFT", healthBar, 3, -5)
+	bossIconRegion:SetSize(12, 12)
+	bossIconRegion:SetTexture(eliteTexture)
 
 	frame.oldglow = glowRegion
 	frame.elite = stateIconRegion
@@ -358,7 +372,6 @@ local CreatePlate = function(frame)
 	shieldedRegion:SetTexture(nil)
 	castbarOverlay:SetTexture(nil)
 	stateIconRegion:SetAlpha(0)
-	bossIconRegion:SetTexture(nil)
 
 	UpdatePlate(frame)
 	frame:SetScript("OnShow", UpdatePlate)
@@ -368,17 +381,6 @@ local CreatePlate = function(frame)
 
 	frame:SetScript("OnUpdate", ThreatUpdate)
 end
-
-
-
-
-
-
-
-
-
-
-
 
 local numKids = 0
 local lastUpdate = 0
@@ -406,71 +408,3 @@ local OnUpdate = function(self, elapsed)
 	end
 end
 caelNamePlates:SetScript("OnUpdate", OnUpdate)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
